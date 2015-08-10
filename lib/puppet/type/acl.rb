@@ -212,19 +212,19 @@ Puppet::Type.newtype(:acl) do
 
   def newchild(path)
     full_path = ::File.join(self[:path], path)
-    options = @original_parameters.merge(:path => full_path, :name => full_path).reject { |param, value| value.nil? }
-    [:recurse, :path].each do |param|
+    options = @original_parameters.merge(:name => full_path).reject { |param, value| value.nil? }
+    [:recursive, :recursemode, :path].each do |param|
       options.delete(param) if options.include?(param)
     end
     self.class.new(options)
   end
 
-  def eval_generate
+  def generate
     return [] unless self[:recursive] == :true and self[:recursemode] == :deep
     return [] unless File.directory?(self[:path])
     results = []
     Dir.chdir(self[:path]) do
-      Dir['**', '*'].each do |path|
+      Dir['**/*'].each do |path|
         results << newchild(path)
       end
     end
